@@ -93,9 +93,34 @@ XML
 
             except Exception as e:
 
+                error = str(e)
+
+                # --------------------------------------------------
+                # Gemini Free Tier / Quota Exhausted
+                # --------------------------------------------------
+
+                if (
+                    "RESOURCE_EXHAUSTED" in error
+                    or "429" in error
+                    or "quota" in error.lower()
+                    or "rate limit" in error.lower()
+                ):
+
+                    print("\n - ai_service.py:109" + "=" * 80)
+                    print("GEMINI FREE TIER LIMIT REACHED - ai_service.py:110")
+                    print("Stopping extraction. - ai_service.py:111")
+                    print("Please run the program again after your quota resets. - ai_service.py:112")
+                    print("= - ai_service.py:113" * 80)
+
+                    raise RuntimeError("GEMINI_QUOTA_EXCEEDED")
+
+                # --------------------------------------------------
+                # Normal Errors
+                # --------------------------------------------------
+
                 print(
                     f"Gemini failed "
-                    f"(Attempt {attempt + 1}/{retries}) : {e}"
+                    f"(Attempt {attempt + 1}/{retries}) : {error}"
                 )
 
                 if attempt < retries - 1:
