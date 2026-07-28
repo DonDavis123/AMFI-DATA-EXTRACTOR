@@ -13,7 +13,7 @@ def main():
     logger = Logger()
     progress = ProgressTracker()
 
-    MAX_SCHEMES = 10
+    MAX_SCHEMES = 15
 
     # --------------------------------------------------
     # Load Previous Progress
