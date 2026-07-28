@@ -17,7 +17,7 @@ class GeminiAI:
         genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
         self.model = genai.GenerativeModel(
-            "gemini-3.5-flash-lite"
+            "gemini-3.5-flash"
         )
 
     def extract(self, xml):
@@ -67,6 +67,23 @@ Extract ONLY the actual fund manager names.
 14. Never return Direct Plans.
 15. Return valid JSON only.
 
+IMPORTANT:
+
+- Every object MUST contain ALL of these fields:
+  - fund_name
+  - isin
+  - fund_type
+  - riskometer_at_launch
+  - riskometer_as_on_date
+  - category
+  - description
+  - fund_manager_name
+
+- Never omit any field.
+- If a value is missing in the XML, return an empty string ("").
+- Never return null.
+- Never invent values.
+
 XML
 
 {xml}
@@ -106,11 +123,11 @@ XML
                     or "rate limit" in error.lower()
                 ):
 
-                    print("\n - ai_service.py:109" + "=" * 80)
-                    print("GEMINI FREE TIER LIMIT REACHED - ai_service.py:110")
-                    print("Stopping extraction. - ai_service.py:111")
-                    print("Please run the program again after your quota resets. - ai_service.py:112")
-                    print("= - ai_service.py:113" * 80)
+                    print("\n - ai_service.py:126" + "=" * 80)
+                    print("GEMINI FREE TIER LIMIT REACHED - ai_service.py:127")
+                    print("Stopping extraction. - ai_service.py:128")
+                    print("Please run the program again after your quota resets. - ai_service.py:129")
+                    print("= - ai_service.py:130" * 80)
 
                     raise RuntimeError("GEMINI_QUOTA_EXCEEDED")
 
