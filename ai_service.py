@@ -2,8 +2,10 @@ import os
 import json
 import time
 
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
+
 
 from models import FundExtraction
 
@@ -14,10 +16,8 @@ class GeminiAI:
 
         load_dotenv()
 
-        genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-        self.model = genai.GenerativeModel(
-            "gemini-3.5-flash"
+        self.client = genai.Client(
+            api_key=os.getenv("GEMINI_API_KEY")
         )
 
     def extract(self, xml):
@@ -77,10 +77,12 @@ XML
         for attempt in range(retries):
 
             try:
-
-                response = self.model.generate_content(
-                    prompt,
-                    generation_config=genai.GenerationConfig(
+                print(f"XML characters : {len(xml):,} - ai_service.py:80")
+                print(f"Prompt characters : {len(prompt):,} - ai_service.py:81")
+                response = self.client.models.generate_content(
+                    model="gemini-3.5-flash-lite",
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
                         response_mime_type="application/json",
                         response_schema=FundExtraction,
                         temperature=0,
@@ -94,6 +96,13 @@ XML
             except Exception as e:
 
                 error = str(e)
+                import traceback
+
+                print("= - ai_service.py:101" * 80)
+                print(type(e))
+                print(repr(e))
+                traceback.print_exc()
+                print("= - ai_service.py:105" * 80)  
 
                 # --------------------------------------------------
                 # Gemini Free Tier / Quota Exhausted
@@ -106,11 +115,11 @@ XML
                     or "rate limit" in error.lower()
                 ):
 
-                    print("\n - ai_service.py:109" + "=" * 80)
-                    print("GEMINI FREE TIER LIMIT REACHED - ai_service.py:110")
-                    print("Stopping extraction. - ai_service.py:111")
-                    print("Please run the program again after your quota resets. - ai_service.py:112")
-                    print("= - ai_service.py:113" * 80)
+                    print("\n - ai_service.py:118" + "=" * 80)
+                    print("GEMINI FREE TIER LIMIT REACHED - ai_service.py:119")
+                    print("Stopping extraction. - ai_service.py:120")
+                    print("Please run the program again after your quota resets. - ai_service.py:121")
+                    print("= - ai_service.py:122" * 80)
 
                     raise RuntimeError("GEMINI_QUOTA_EXCEEDED")
 

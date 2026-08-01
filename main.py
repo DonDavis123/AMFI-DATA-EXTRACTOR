@@ -3,6 +3,7 @@ from ai_service import GeminiAI
 from excel_service import ExcelService
 from logger import Logger
 from progress import ProgressTracker
+from xml_optimizer import XmlOptimizer
 
 
 def main():
@@ -12,8 +13,9 @@ def main():
     excel = ExcelService()
     logger = Logger()
     progress = ProgressTracker()
-
-    MAX_SCHEMES = 10
+    optimizer=XmlOptimizer()
+    
+    MAX_SCHEMES = 20
 
     # --------------------------------------------------
     # Load Previous Progress
@@ -29,14 +31,14 @@ def main():
         last_mf_id = saved_progress["mf_id"]
         last_index = saved_progress["last_index"]
 
-        print("\nPrevious progress found. - main.py:32")
-        print(f"Resume Fund ID : {last_mf_id} - main.py:33")
-        print(f"Resume Index   : {last_index + 1} - main.py:34")
+        print("\nPrevious progress found. - main.py:34")
+        print(f"Resume Fund ID : {last_mf_id} - main.py:35")
+        print(f"Resume Index   : {last_index + 1} - main.py:36")
 
     else:
 
-        print("\nNo previous progress found. - main.py:38")
-        print("Starting from first fund. - main.py:39")
+        print("\nNo previous progress found. - main.py:40")
+        print("Starting from first fund. - main.py:41")
 
     # --------------------------------------------------
     # Get All Funds
@@ -64,11 +66,11 @@ def main():
 
             resume_fund = True
 
-        print("\n - main.py:67")
-        print("= - main.py:68" * 80)
-        print(f"Fund House : {fund_name} - main.py:69")
-        print(f"MF ID      : {mf_id} - main.py:70")
-        print("= - main.py:71" * 80)
+        print("\n - main.py:69")
+        print("= - main.py:70" * 80)
+        print(f"Fund House : {fund_name} - main.py:71")
+        print(f"MF ID      : {mf_id} - main.py:72")
+        print("= - main.py:73" * 80)
 
         # ----------------------------------------------
         # Get Schemes
@@ -88,16 +90,16 @@ def main():
                 error=str(e)
             )
 
-            print(f"Unable to fetch schemes : {e} - main.py:91")
+            print(f"Unable to fetch schemes : {e} - main.py:93")
 
             continue
 
         if not schemes:
 
-            print("No schemes found. - main.py:97")
+            print("No schemes found. - main.py:99")
             continue
 
-        print(f"Total Schemes : {len(schemes)} - main.py:100")
+        print(f"Total Schemes : {len(schemes)} - main.py:102")
 
         # ----------------------------------------------
         # Resume Index
@@ -113,7 +115,7 @@ def main():
 
         if start_index >= len(schemes):
 
-            print("This fund is already completed. - main.py:116")
+            print("This fund is already completed. - main.py:118")
             last_index = -1
             continue
 
@@ -133,10 +135,10 @@ def main():
             scheme_id = scheme["scheme_id"]
             scheme_name = scheme["scheme_name"]
 
-            print("\n - main.py:136" + "-" * 80)
-            print(f"Scheme {index + 1}/{len(schemes)} - main.py:137")
-            print(f"Scheme ID   : {scheme_id} - main.py:138")
-            print(f"Scheme Name : {scheme_name} - main.py:139")
+            print("\n - main.py:138" + "-" * 80)
+            print(f"Scheme {index + 1}/{len(schemes)} - main.py:139")
+            print(f"Scheme ID   : {scheme_id} - main.py:140")
+            print(f"Scheme Name : {scheme_name} - main.py:141")
             print("" * 80)
 
             # ------------------------------------------
@@ -154,7 +156,7 @@ def main():
                         "Downloaded XML is empty."
                     )
 
-                print("✓ XML Downloaded - main.py:157")
+                print("✓ XML Downloaded - main.py:159")
 
             except Exception as e:
 
@@ -173,7 +175,42 @@ def main():
                     scheme_name=scheme_name
                 )
 
-                print(f"✗ XML Error : {e} - main.py:176")
+                print(f"✗ XML Error : {e} - main.py:178")
+
+                continue
+            # ------------------------------------------
+            # Optimize XML
+            # ------------------------------------------
+
+            try:
+
+                original_size = len(xml)
+
+                xml = optimizer.optimize(xml)
+
+                optimized_size = len(xml)
+
+                removed = original_size - optimized_size
+
+                reduction = (removed / original_size) * 100
+
+                print(f"✓ XML Optimized - main.py:197")
+                print(f"Original Size : {original_size:,} chars - main.py:198")
+                print(f"Optimized Size: {optimized_size:,} chars - main.py:199")
+                print(f"Removed       : {removed:,} chars - main.py:200")
+                print(f"Reduction     : {reduction:.2f}% - main.py:201")
+
+            except Exception as e:
+
+                logger.log_error(
+                mf_id=mf_id,
+                scheme_id=scheme_id,
+                scheme_name=scheme_name,
+                stage="XML Optimizer",
+                error=str(e)
+                )
+
+                print(f"✗ XML Optimizer Error : {e} - main.py:213")
 
                 continue
 
@@ -191,16 +228,16 @@ def main():
                         "Gemini returned no data."
                     )
 
-                print("✓ Gemini Success - main.py:194")
+                print("✓ Gemini Success - main.py:231")
 
             except RuntimeError as e:
 
                 if str(e) == "GEMINI_QUOTA_EXCEEDED":
 
-                    print("\n - main.py:200" + "=" * 80)
-                    print("Gemini quota exhausted. - main.py:201")
-                    print("Saving progress and terminating program... - main.py:202")
-                    print("= - main.py:203" * 80)
+                    print("\n - main.py:237" + "=" * 80)
+                    print("Gemini quota exhausted. - main.py:238")
+                    print("Saving progress and terminating program... - main.py:239")
+                    print("= - main.py:240" * 80)
 
                     progress.save_progress(
                         mf_id=mf_id,
@@ -230,7 +267,7 @@ def main():
                     scheme_name=scheme_name
                 )
 
-                print(f"✗ Gemini Error : {e} - main.py:233")
+                print(f"✗ Gemini Error : {e} - main.py:270")
 
                 continue
 
@@ -242,7 +279,7 @@ def main():
 
                 excel.append(result)
 
-                print("✓ Data written to Excel. - main.py:245")
+                print("✓ Data written to Excel. - main.py:282")
 
             except Exception as e:
 
@@ -261,7 +298,7 @@ def main():
                     scheme_name=scheme_name
                 )
 
-                print(f"✗ Excel Error : {e} - main.py:264")
+                print(f"✗ Excel Error : {e} - main.py:301")
 
                 continue
 
@@ -282,7 +319,7 @@ def main():
                 scheme_name=scheme_name
             )
 
-            print("\nExtracted Data:\n - main.py:285")
+            print("\nExtracted Data:\n - main.py:322")
             print(result.model_dump_json(indent=4))
 
         # ----------------------------------------------
@@ -291,9 +328,9 @@ def main():
 
         if end_index >= len(schemes):
 
-            print("\n - main.py:294" + "=" * 80)
-            print(f"✓ Completed Fund House : {fund_name} - main.py:295")
-            print("= - main.py:296" * 80)
+            print("\n - main.py:331" + "=" * 80)
+            print(f"✓ Completed Fund House : {fund_name} - main.py:332")
+            print("= - main.py:333" * 80)
 
             # Reset scheme index so next fund starts
             # from its first scheme.
@@ -304,11 +341,11 @@ def main():
 
             remaining = len(schemes) - end_index
 
-            print("\n - main.py:307" + "=" * 80)
-            print(f"Batch completed for {fund_name} - main.py:308")
-            print(f"Processed upto : {end_index} - main.py:309")
-            print(f"Remaining      : {remaining} - main.py:310")
-            print("= - main.py:311" * 80)
+            print("\n - main.py:344" + "=" * 80)
+            print(f"Batch completed for {fund_name} - main.py:345")
+            print(f"Processed upto : {end_index} - main.py:346")
+            print(f"Remaining      : {remaining} - main.py:347")
+            print("= - main.py:348" * 80)
 
             return
 
@@ -318,10 +355,10 @@ def main():
 
     progress.clear_progress()
 
-    print("\n - main.py:321" + "=" * 80)
-    print("ALL FUND HOUSES HAVE BEEN PROCESSED SUCCESSFULLY - main.py:322")
-    print("No pending schemes remain. - main.py:323")
-    print("= - main.py:324" * 80)
+    print("\n - main.py:358" + "=" * 80)
+    print("ALL FUND HOUSES HAVE BEEN PROCESSED SUCCESSFULLY - main.py:359")
+    print("No pending schemes remain. - main.py:360")
+    print("= - main.py:361" * 80)
 
 
 if __name__ == "__main__":
