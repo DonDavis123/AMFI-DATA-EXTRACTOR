@@ -2,7 +2,7 @@ from xml.etree import ElementTree as ET
 from copy import deepcopy
 
 
-class XmlOptimizer:
+class SpreadsheetOptimizer:
     """
     Optimizes Excel 2003 SpreadsheetML XML before sending it to Gemini.
 
@@ -45,15 +45,7 @@ class XmlOptimizer:
         except Exception:
             return xml_string
 
-        # -------------------------------------------------------
-        # Verify SpreadsheetML
-        # -------------------------------------------------------
-
-        if not root.tag.endswith("Workbook"):
-            return xml_string
-
-        if self.SPREADSHEET_NS not in root.tag:
-            return xml_string
+       
 
         root = deepcopy(root)
 
@@ -128,11 +120,25 @@ class XmlOptimizer:
         # -------------------------------------------------------
         # Return optimized XML
         # -------------------------------------------------------
-
-        return ET.tostring(
-            root,
-            encoding="unicode"
+        optimized_xml = ET.tostring(
+           root,
+           encoding="unicode"
         )
+
+        original_size = len(xml_string)
+        optimized_size = len(optimized_xml)
+
+        reduction = (
+        (original_size - optimized_size)
+        / original_size
+        ) * 100
+
+        print("\n✓ Spreadsheet Optimization Complete - spreadsheet_optimizer.py:136")
+        print(f"Original Size : {original_size:,} chars - spreadsheet_optimizer.py:137")
+        print(f"Optimized Size: {optimized_size:,} chars - spreadsheet_optimizer.py:138")
+        print(f"Reduction     : {reduction:.2f}% - spreadsheet_optimizer.py:139")
+
+        return optimized_xml
 
     def _find_parent(self, root, child):
 
