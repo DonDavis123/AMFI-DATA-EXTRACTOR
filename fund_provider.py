@@ -1,4 +1,5 @@
 import requests
+from processors.decoder.xml_decoder import XmlDecoder
 
 
 class FundProvider:
@@ -197,5 +198,12 @@ class FundProvider:
         )
 
         response.raise_for_status()
+        decoded =XmlDecoder.decode(response.content)
+        if decoded is not None:
+            return decoded
+        print(
+            "Using original response.text"
+            )
+        
 
         return response.text

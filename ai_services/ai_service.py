@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from ai_services.errorhandler import GeminiErrorHandler
 from models import FundExtraction
+from ai_services.api_keymanager import ApiKeyManager
 
 
 class GeminiAI:
@@ -16,15 +17,18 @@ class GeminiAI:
     def __init__(self):
 
         load_dotenv()
+        
+
+        self.key_manager=ApiKeyManager()
 
         self.client = genai.Client(
-            api_key=os.getenv("GEMINI_API_KEY")
+            api_key=self.key_manager.get_key()
         )
 
     def extract(self, xml):
 
         if not xml or not xml.strip():
-            print("Empty XML received. - ai_service.py:27")
+            print("Empty XML received. - ai_service.py:31")
             return None
 
         prompt = f"""
@@ -78,8 +82,8 @@ XML
         for attempt in range(retries):
 
             try:
-                print(f"XML characters : {len(xml):,} - ai_service.py:81")
-                print(f"Prompt characters : {len(prompt):,} - ai_service.py:82")
+                print(f"XML characters : {len(xml):,} - ai_service.py:85")
+                print(f"Prompt characters : {len(prompt):,} - ai_service.py:86")
                 response = self.client.models.generate_content(
                     model="gemini-3.5-flash-lite",
                     contents=prompt,
@@ -99,11 +103,11 @@ XML
                 error = str(e)
                 import traceback
 
-                print("= - ai_service.py:102" * 80)
+                print("= - ai_service.py:106" * 80)
                 print(type(e))
                 print(repr(e))
                 traceback.print_exc()
-                print("= - ai_service.py:106" * 80)  
+                print("= - ai_service.py:110" * 80)  
 
                 # --------------------------------------------------
                 # Gemini Free Tier / Quota Exhausted
@@ -112,6 +116,23 @@ XML
                 action = GeminiErrorHandler.handle(e,attempt,retries)
                 if action == "retry":
                     continue
+                if action == "switch_key":
+                    try:
+                        new_key=self.key_manager.switch_key()
+                        self.client=genai.Client(
+                            api_key=new_key
+                        )
+                        print(
+                            f"switched to API key"
+                            f"{self.key_manager.current_key_number()}/"
+                            f"{self.key_manager.total_keys()}"
+
+                        )
+                        continue
+                    except RuntimeError:
+                        raise RuntimeError(
+                            "ALL_API_KEYS_EXHAUSTED"
+                        )
                 if action =="failed":
                     continue
 

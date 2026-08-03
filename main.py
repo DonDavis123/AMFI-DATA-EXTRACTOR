@@ -15,7 +15,7 @@ def main():
     progress = ProgressTracker()
     optimizer = XmlManager()
     
-    MAX_SCHEMES = 500
+    MAX_SCHEMES = 2
 
     # --------------------------------------------------
     # Load Previous Progress
@@ -30,15 +30,16 @@ def main():
 
         last_mf_id = saved_progress["mf_id"]
         last_index = saved_progress["last_index"]
+        
 
-        print("\nPrevious progress found. - main.py:34")
-        print(f"Resume Fund ID : {last_mf_id} - main.py:35")
-        print(f"Resume Index   : {last_index + 1} - main.py:36")
+        print("\nPrevious progress found. - main.py:35")
+        print(f"Resume Fund ID : {last_mf_id} - main.py:36")
+        print(f"Resume Index   : {last_index + 1} - main.py:37")
 
     else:
 
-        print("\nNo previous progress found. - main.py:40")
-        print("Starting from first fund. - main.py:41")
+        print("\nNo previous progress found. - main.py:41")
+        print("Starting from first fund. - main.py:42")
 
     # --------------------------------------------------
     # Get All Funds
@@ -66,11 +67,11 @@ def main():
 
             resume_fund = True
 
-        print("\n - main.py:69")
-        print("= - main.py:70" * 80)
-        print(f"Fund House : {fund_name} - main.py:71")
-        print(f"MF ID      : {mf_id} - main.py:72")
-        print("= - main.py:73" * 80)
+        print("\n - main.py:70")
+        print("= - main.py:71" * 80)
+        print(f"Fund House : {fund_name} - main.py:72")
+        print(f"MF ID      : {mf_id} - main.py:73")
+        print("= - main.py:74" * 80)
 
         # ----------------------------------------------
         # Get Schemes
@@ -90,16 +91,16 @@ def main():
                 error=str(e)
             )
 
-            print(f"Unable to fetch schemes : {e} - main.py:93")
+            print(f"Unable to fetch schemes : {e} - main.py:94")
 
             continue
 
         if not schemes:
 
-            print("No schemes found. - main.py:99")
+            print("No schemes found. - main.py:100")
             continue
 
-        print(f"Total Schemes : {len(schemes)} - main.py:102")
+        print(f"Total Schemes : {len(schemes)} - main.py:103")
 
         # ----------------------------------------------
         # Resume Index
@@ -115,7 +116,7 @@ def main():
 
         if start_index >= len(schemes):
 
-            print("This fund is already completed. - main.py:118")
+            print("This fund is already completed. - main.py:119")
             last_index = -1
             continue
 
@@ -134,11 +135,18 @@ def main():
 
             scheme_id = scheme["scheme_id"]
             scheme_name = scheme["scheme_name"]
+            progress.save_progress(
+               mf_id=mf_id,
+               last_index=index - 1,
+               scheme_id=scheme_id,
+               scheme_name=scheme_name,
+               status="processing"
+               )
 
-            print("\n - main.py:138" + "-" * 80)
-            print(f"Scheme {index + 1}/{len(schemes)} - main.py:139")
-            print(f"Scheme ID   : {scheme_id} - main.py:140")
-            print(f"Scheme Name : {scheme_name} - main.py:141")
+            print("\n - main.py:146" + "-" * 80)
+            print(f"Scheme {index + 1}/{len(schemes)} - main.py:147")
+            print(f"Scheme ID   : {scheme_id} - main.py:148")
+            print(f"Scheme Name : {scheme_name} - main.py:149")
             print("" * 80)
 
             # ------------------------------------------
@@ -156,7 +164,7 @@ def main():
                         "Downloaded XML is empty."
                     )
 
-                print("✓ XML Downloaded - main.py:159")
+                print("✓ XML Downloaded - main.py:167")
 
             except Exception as e:
 
@@ -170,12 +178,13 @@ def main():
 
                 progress.save_progress(
                     mf_id=mf_id,
-                    last_index=index,
+                    last_index=index-1,
                     scheme_id=scheme_id,
-                    scheme_name=scheme_name
+                    scheme_name=scheme_name,
+                    status="processing"
                 )
 
-                print(f"✗ XML Error : {e} - main.py:178")
+                print(f"✗ XML Error : {e} - main.py:187")
 
                 continue
             # ------------------------------------------
@@ -192,9 +201,19 @@ def main():
 
                 
 
-                print(f"✓ XML Optimized - main.py:195")
+                
                 
             except Exception as e:
+
+
+
+                progress.save_progress(
+                  mf_id=mf_id,
+                  last_index=index - 1,
+                  scheme_id=scheme_id,
+                  scheme_name=scheme_name,
+                  status="processing"
+                 )
 
                 logger.log_error(
                 mf_id=mf_id,
@@ -204,7 +223,7 @@ def main():
                 error=str(e)
                 )
 
-                print(f"✗ XML Optimizer Error : {e} - main.py:207")
+                print(f"✗ XML Optimizer Error : {e} - main.py:226")
 
                 continue
 
@@ -222,22 +241,23 @@ def main():
                         "Gemini returned no data."
                     )
 
-                print("✓ Gemini Success - main.py:225")
+                print("✓ Gemini Success - main.py:244")
 
             except RuntimeError as e:
 
-                if str(e) == "GEMINI_QUOTA_EXCEEDED":
+                if str(e) == "ALL API KEYS ARE EXHAUSTED":
 
-                    print("\n - main.py:231" + "=" * 80)
-                    print("Gemini quota exhausted. - main.py:232")
-                    print("Saving progress and terminating program... - main.py:233")
-                    print("= - main.py:234" * 80)
+                    print("\n - main.py:250" + "=" * 80)
+                    print("Gemini quota exhausted. - main.py:251")
+                    print("Saving progress and terminating program... - main.py:252")
+                    print("= - main.py:253" * 80)
 
                     progress.save_progress(
                         mf_id=mf_id,
                         last_index=index - 1,
                         scheme_id=scheme_id,
-                        scheme_name=scheme_name
+                        scheme_name=scheme_name,
+                        status="API_keys_are_exhausted"
                     )
 
                     return
@@ -256,12 +276,13 @@ def main():
 
                 progress.save_progress(
                     mf_id=mf_id,
-                    last_index=index,
+                    last_index=index-1,
                     scheme_id=scheme_id,
-                    scheme_name=scheme_name
+                    scheme_name=scheme_name,
+                    status="processing"
                 )
 
-                print(f"✗ Gemini Error : {e} - main.py:264")
+                print(f"✗ Gemini Error : {e} - main.py:285")
 
                 continue
 
@@ -273,7 +294,7 @@ def main():
 
                 excel.append(result)
 
-                print("✓ Data written to Excel. - main.py:276")
+                print("✓ Data written to Excel. - main.py:297")
 
             except Exception as e:
 
@@ -287,12 +308,13 @@ def main():
 
                 progress.save_progress(
                     mf_id=mf_id,
-                    last_index=index,
+                    last_index=index-1,
                     scheme_id=scheme_id,
-                    scheme_name=scheme_name
+                    scheme_name=scheme_name,
+                    status="processing"
                 )
 
-                print(f"✗ Excel Error : {e} - main.py:295")
+                print(f"✗ Excel Error : {e} - main.py:317")
 
                 continue
 
@@ -304,7 +326,8 @@ def main():
                 mf_id=mf_id,
                 last_index=index,
                 scheme_id=scheme_id,
-                scheme_name=scheme_name
+                scheme_name=scheme_name,
+                status="completed"
             )
 
             logger.log_success(
@@ -313,7 +336,7 @@ def main():
                 scheme_name=scheme_name
             )
 
-            print("\nExtracted Data:\n - main.py:316")
+            print("\nExtracted Data:\n - main.py:339")
             print(result.model_dump_json(indent=4))
 
         # ----------------------------------------------
@@ -322,9 +345,9 @@ def main():
 
         if end_index >= len(schemes):
 
-            print("\n - main.py:325" + "=" * 80)
-            print(f"✓ Completed Fund House : {fund_name} - main.py:326")
-            print("= - main.py:327" * 80)
+            print("\n - main.py:348" + "=" * 80)
+            print(f"✓ Completed Fund House : {fund_name} - main.py:349")
+            print("= - main.py:350" * 80)
 
             # Reset scheme index so next fund starts
             # from its first scheme.
@@ -335,11 +358,11 @@ def main():
 
             remaining = len(schemes) - end_index
 
-            print("\n - main.py:338" + "=" * 80)
-            print(f"Batch completed for {fund_name} - main.py:339")
-            print(f"Processed upto : {end_index} - main.py:340")
-            print(f"Remaining      : {remaining} - main.py:341")
-            print("= - main.py:342" * 80)
+            print("\n - main.py:361" + "=" * 80)
+            print(f"Batch completed for {fund_name} - main.py:362")
+            print(f"Processed upto : {end_index} - main.py:363")
+            print(f"Remaining      : {remaining} - main.py:364")
+            print("= - main.py:365" * 80)
 
             return
 
@@ -349,11 +372,77 @@ def main():
 
     progress.clear_progress()
 
-    print("\n - main.py:352" + "=" * 80)
-    print("ALL FUND HOUSES HAVE BEEN PROCESSED SUCCESSFULLY - main.py:353")
-    print("No pending schemes remain. - main.py:354")
-    print("= - main.py:355" * 80)
+    print("\n - main.py:375" + "=" * 80)
+    print("ALL FUND HOUSES HAVE BEEN PROCESSED SUCCESSFULLY - main.py:376")
+    print("No pending schemes remain. - main.py:377")
+    print("= - main.py:378" * 80)
 
 
 if __name__ == "__main__":
-    main()            
+
+    try:
+
+        main()
+
+    # --------------------------------------------------
+    # User Interrupted
+    # --------------------------------------------------
+
+    except KeyboardInterrupt:
+
+        print("\n - main.py:393" + "=" * 80)
+        print("PROGRAM INTERRUPTED BY USER - main.py:394")
+        print("Progress has already been saved. - main.py:395")
+        print("Restart the program to continue. - main.py:396")
+        print("= - main.py:397" * 80)
+
+    # --------------------------------------------------
+    # File Permission Problems
+    # --------------------------------------------------
+
+    except PermissionError as e:
+
+        print("\n - main.py:405" + "=" * 80)
+        print("PERMISSION ERROR - main.py:406")
+        print(str(e))
+        print()
+        print("Possible reasons: - main.py:409")
+        print("Excel file is open. - main.py:410")
+        print("Log file is locked. - main.py:411")
+        print("No write permission. - main.py:412")
+        print()
+        print("Fix the issue and restart. - main.py:414")
+        print("= - main.py:415" * 80)
+
+    # --------------------------------------------------
+    # Out of Memory
+    # --------------------------------------------------
+
+    except MemoryError:
+
+        print("\n - main.py:423" + "=" * 80)
+        print("OUT OF MEMORY - main.py:424")
+        print()
+        print("Possible reasons: - main.py:426")
+        print("XML file too large. - main.py:427")
+        print("Too many objects in memory. - main.py:428")
+        print("System RAM exhausted. - main.py:429")
+        print()
+        print("Close other applications and restart. - main.py:431")
+        print("= - main.py:432" * 80)
+
+    # --------------------------------------------------
+    # Any Unexpected Fatal Error
+    # --------------------------------------------------
+
+    except Exception as e:
+
+        import traceback
+
+        print("\n - main.py:442" + "=" * 80)
+        print("UNEXPECTED FATAL ERROR - main.py:443")
+        print(type(e).__name__)
+        print(str(e))
+        print("= - main.py:446" * 80)
+
+        traceback.print_exc()

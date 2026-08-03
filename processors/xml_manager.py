@@ -32,12 +32,13 @@ class XmlManager:
         try:
             root = ET.fromstring(xml_string)
 
-        except ET.ParseError:
+        except ET.ParseError as e:
 
-            print("\nInvalid XML. - xml_manager.py:37")
-            print("Skipping optimization. - xml_manager.py:38")
+         print(f"Parse Error: {e} - xml_manager.py:37")
 
-            return xml_string
+         print(repr(xml_string[:300]))
+
+         return xml_string
 
         # --------------------------------------------------
         # Detect SpreadsheetML
@@ -48,8 +49,8 @@ class XmlManager:
             and self.SPREADSHEET_NS in root.tag
         ):
 
-            print("\nDetected XML : SpreadsheetML - xml_manager.py:51")
-            print("Using Spreadsheet Optimizer... - xml_manager.py:52")
+            print("\nDetected XML : SpreadsheetML - xml_manager.py:52")
+            print("Using Spreadsheet Optimizer... - xml_manager.py:53")
 
             return self.spreadsheet_optimizer.optimize(
                 xml_string
@@ -61,8 +62,8 @@ class XmlManager:
 
         if root.tag.endswith("SchemeSummaryDocument"):
 
-            print("\nDetected XML : SchemeSummaryDocument - xml_manager.py:64")
-            print("Using SchemeSummary Optimizer... - xml_manager.py:65")
+            print("\nDetected XML : SchemeSummaryDocument - xml_manager.py:65")
+            print("Using SchemeSummary Optimizer... - xml_manager.py:66")
 
             return self.scheme_optimizer.optimize(
                 xml_string
@@ -72,7 +73,7 @@ class XmlManager:
         # Unknown XML
         # --------------------------------------------------
 
-        print("\nUnknown XML format. - xml_manager.py:75")
-        print("Skipping optimization. - xml_manager.py:76")
+        print("\nUnknown XML format. - xml_manager.py:76")
+        print("Skipping optimization. - xml_manager.py:77")
 
         return xml_string
