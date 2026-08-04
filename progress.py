@@ -19,14 +19,16 @@ class ProgressTracker:
         mf_id,
         last_index,
         scheme_id,
-        scheme_name
+        scheme_name,
+        status
     ):
 
         data = {
             "mf_id": mf_id,
             "last_index": last_index,
             "scheme_id": scheme_id,
-            "scheme_name": scheme_name
+            "scheme_name": scheme_name,
+            "status": status
         }
 
         with open(self.file_path, "w", encoding="utf-8") as file:
