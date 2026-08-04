@@ -79,61 +79,105 @@ XML
 
         retries = 3
 
-        for attempt in range(retries):
+        while True:
 
-            try:
-                print(f"XML characters : {len(xml):,} - ai_service.py:85")
-                print(f"Prompt characters : {len(prompt):,} - ai_service.py:86")
-                response = self.client.models.generate_content(
-                    model="gemini-3.5-flash-lite",
-                    contents=prompt,
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        response_schema=FundExtraction,
-                        temperature=0,
-                    ),
-                )
+            for attempt in range(retries):
 
-                data = json.loads(response.text)
+                try:
 
-                return FundExtraction(**data)
+                    print(
+                        f"Using API Key : "
+                        f"{self.key_manager.current_key_number()}/"
+                        f"{self.key_manager.total_keys()}"
+                    )
 
-            except Exception as e:
+                    print(f"XML characters : {len(xml):,} - ai_service.py:94")
+                    print(f"Prompt characters : {len(prompt):,} - ai_service.py:95")
 
-                error = str(e)
-                import traceback
+                    response = self.client.models.generate_content(
+                        model="gemini-3.5-flash-lite",
+                        contents=prompt,
+                        config=types.GenerateContentConfig(
+                            response_mime_type="application/json",
+                            response_schema=FundExtraction,
+                            temperature=0,
+                        ),
+                    )
 
-                print("= - ai_service.py:106" * 80)
-                print(type(e))
-                print(repr(e))
-                traceback.print_exc()
-                print("= - ai_service.py:110" * 80)  
+                    data = json.loads(response.text)
 
-                # --------------------------------------------------
-                # Gemini Free Tier / Quota Exhausted
-                # --------------------------------------------------
+                    return FundExtraction(**data)
 
-                action = GeminiErrorHandler.handle(e,attempt,retries)
-                if action == "retry":
-                    continue
-                if action == "switch_key":
-                    try:
-                        new_key=self.key_manager.switch_key()
-                        self.client=genai.Client(
-                            api_key=new_key
-                        )
-                        print(
-                            f"switched to API key"
-                            f"{self.key_manager.current_key_number()}/"
-                            f"{self.key_manager.total_keys()}"
+                except Exception as e:
 
-                        )
+                    import traceback
+
+                    print("= - ai_service.py:115" * 80)
+                    print(type(e))
+                    print(repr(e))
+                    traceback.print_exc()
+                    print("= - ai_service.py:119" * 80)
+
+                    action = GeminiErrorHandler.handle(
+                        e,
+                        attempt,
+                        retries
+                    )
+
+                    # ------------------------------------------
+                    # Retry using the same API key
+                    # ------------------------------------------
+
+                    if action == "retry":
                         continue
-                    except RuntimeError:
-                        raise RuntimeError(
-                            "ALL_API_KEYS_EXHAUSTED"
-                        )
-                if action =="failed":
-                    continue
+                    if action == "retry_forever":
 
-        return None
+                        print("\nWaiting for Gemini service to recover... - ai_service.py:135")
+
+                        break
+
+                    # ------------------------------------------
+                    # Switch to next API key
+                    # ------------------------------------------
+
+                    if action == "switch_key":
+
+                        try:
+
+                            new_key = self.key_manager.switch_key()
+
+                            self.client = genai.Client(
+                                api_key=new_key
+                            )
+
+                            print("\n - ai_service.py:153" + "=" * 80)
+                            print(
+                                f"Switched to API Key "
+                                f"{self.key_manager.current_key_number()}/"
+                                f"{self.key_manager.total_keys()}"
+                            )
+                            print("= - ai_service.py:159" * 80)
+
+                            # Exit retry loop and restart with new key
+                            break
+
+                        except RuntimeError:
+
+                            raise RuntimeError(
+                                "ALL_API_KEYS_EXHAUSTED"
+                            )
+
+                    # ------------------------------------------
+                    # Non-retryable error
+                    # ------------------------------------------
+
+                    if action == "failed":
+                        return None
+
+            else:
+                # Success never happened and no key switch occurred.
+                return None
+
+            # We switched to a new API key.
+            # Restart retry loop using the new key.
+            continue

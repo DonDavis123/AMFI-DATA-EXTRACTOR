@@ -1,5 +1,7 @@
 import requests
+
 from processors.decoder.xml_decoder import XmlDecoder
+from network.network_handler import NetworkHandler
 
 
 class FundProvider:
@@ -65,65 +67,20 @@ class FundProvider:
         }
 
         # ----------------------------------------------------
-        # ONLY THESE AMCs WILL BE PROCESSED
+        # Fund Houses To Process
         # ----------------------------------------------------
 
         self.selected_funds = [
-            
-            85,
-            3,
-            80,
-            53,
-            75,
-            48,
-            46,
-            4,
-            32,
-            81,
-            84,
-            6,
-            47,
-            27,
-            63,
-            9,
-            76,
-            37,
-            20,
-            65,
-            42,
-            70,
-            82,
-            16,
-            17,
-            18,
-            69,
-            45,
-            55,
-            54,
-            21,
-            73,
-            78,
-            58,
-            64,
-            13,
-            41,
-            74,
-            22,
-            67,
-            33,
-            25,
-            26,
-            72,
-            79,
-            61,
-            28,
-            83,
-            71,
+            62, 3, 85, 80, 53, 75, 48, 46, 4, 32,
+            81, 84, 6, 47, 27, 63, 9, 76, 37, 20,
+            65, 42, 70, 82, 16, 17, 18, 69, 45, 55,
+            54, 21, 73, 78, 58, 64, 13, 41, 74, 22,
+            67, 33, 25, 26, 72, 79, 61, 28, 83, 71,
             77
         ]
 
     # ----------------------------------------------------
-    # Returns ONLY selected fund houses
+    # Returns selected AMCs
     # ----------------------------------------------------
 
     def get_all_funds(self):
@@ -148,38 +105,52 @@ class FundProvider:
         return funds
 
     # ----------------------------------------------------
-    # Returns schemes of one fund house
+    # Returns scheme list
     # ----------------------------------------------------
 
     def get_scheme_list(self, mf_id):
 
         url = "https://www.amfiindia.com/api/populate-scheme"
 
-        response = requests.get(
-            url,
-            params={"MF_ID": mf_id},
-            headers={
-                "User-Agent": "Mozilla/5.0"
-            },
-            timeout=20,
-        )
+        while True:
 
-        response.raise_for_status()
+            try:
 
-        data = response.json()
+                response = requests.get(
+                    url,
+                    params={"MF_ID": mf_id},
+                    headers={
+                        "User-Agent": "Mozilla/5.0"
+                    },
+                    timeout=20,
+                )
 
-        schemes = []
+                response.raise_for_status()
 
-        for item in data:
+                data = response.json()
 
-            schemes.append(
-                {
-                    "scheme_id": str(item["scheme_id"]),
-                    "scheme_name": item["scheme_name"],
-                }
-            )
+                schemes = []
 
-        return schemes
+                for item in data:
+
+                    schemes.append(
+                        {
+                            "scheme_id": str(item["scheme_id"]),
+                            "scheme_name": item["scheme_name"],
+                        }
+                    )
+
+                return schemes
+
+            except Exception as e:
+
+                if NetworkHandler.is_network_error(e):
+
+                    NetworkHandler.wait_until_online()
+
+                    continue
+
+                raise
 
     # ----------------------------------------------------
     # Download SSD XML
@@ -189,21 +160,28 @@ class FundProvider:
 
         url = f"https://portal.amfiindia.com/spages/SSD_{scheme_id}.xml"
 
-        response = requests.get(
-            url,
-            headers={
-                "User-Agent": "Mozilla/5.0"
-            },
-            timeout=30,
-        )
+        while True:
 
-        response.raise_for_status()
-        decoded =XmlDecoder.decode(response.content)
-        if decoded is not None:
-            return decoded
-        print(
-            "Using original response.text"
-            )
-        
+            try:
 
-        return response.text
+                response = requests.get(
+                    url,
+                    headers={
+                        "User-Agent": "Mozilla/5.0"
+                    },
+                    timeout=30,
+                )
+
+                response.raise_for_status()
+
+                return XmlDecoder.decode(response.content)
+
+            except Exception as e:
+
+                if NetworkHandler.is_network_error(e):
+
+                    NetworkHandler.wait_until_online()
+
+                    continue
+
+                raise

@@ -4,55 +4,138 @@ import time
 
 class GeminiErrorHandler:
     """
-    Handles Gemini API quota and retry errors.
+    Handles Gemini API errors.
+
+    Returns
+    -------
+    retry         -> Retry using current API key.
+   retry_forever  -> Keep retrying indefinitely (503 High Demand).
+   switch_key     -> Current API key quota exhausted.
+   failed         -> Permanent/non-retryable error.
     """
 
     @staticmethod
     def handle(error, attempt, retries):
 
         message = str(error)
+        message_lower = message.lower()
 
-        # --------------------------------------------------
-        # Quota / Rate Limit
-        # --------------------------------------------------
+        # ==================================================
+        # 1. API QUOTA / RATE LIMIT (429)
+        # ==================================================
 
         if (
-            "RESOURCE_EXHAUSTED" in message
+            "resource_exhausted" in message_lower
             or "429" in message
-            or "quota" in message.lower()
-            or "rate limit" in message.lower()
+            or "quota" in message_lower
+            or "rate limit" in message_lower
         ):
 
             wait = GeminiErrorHandler._get_retry_time(message)
 
-            print("\n - errorhandler.py:28" + "=" * 80)
-            print("GEMINI RATE LIMIT REACHED - errorhandler.py:29")
-            print(f"Retrying after {wait} seconds... - errorhandler.py:30")
-            print("= - errorhandler.py:31" * 80)
+            print("\n - errorhandler.py:36" + "=" * 80)
+            print("GEMINI API QUOTA EXHAUSTED - errorhandler.py:37")
+            print(f"Attempt : {attempt + 1}/{retries} - errorhandler.py:38")
+            print(f"Retry After : {wait} seconds - errorhandler.py:39")
+            print("= - errorhandler.py:40" * 80)
+
+            if attempt < retries - 1:
+
+                time.sleep(wait)
+
+                return "retry"
+
+            print("\nRetries exhausted for current API Key. - errorhandler.py:48")
+            print("Switching to next API Key... - errorhandler.py:49")
+
+            return "switch_key"
+
+        # ==================================================
+        # 2. GEMINI HIGH DEMAND (503)
+        # ==================================================
+
+        high_demand_errors = (
+
+            "503",
+            "unavailable",
+            "high demand",
+            "currently experiencing high demand",
+            "Spikes in demand",
+            "server overloaded",
+            "overloaded",
+
+        )
+
+        if any(
+            text in message_lower
+            for text in high_demand_errors
+        ):
+
+            wait = GeminiErrorHandler._server_wait(attempt)
+
+            print("\n - errorhandler.py:76" + "=" * 80)
+            print("GEMINI SERVER BUSY - errorhandler.py:77")
+            print("Model is experiencing high demand. - errorhandler.py:78")
+            print(f"Waiting {wait} seconds before retrying... - errorhandler.py:79")
+            print("Current scheme will NOT be skipped. - errorhandler.py:80")
+            print("= - errorhandler.py:81" * 80)
 
             time.sleep(wait)
 
-            if attempt < retries - 1:
-                return "retry"
+            return "retry_forever"
 
-            raise RuntimeError("GEMINI_QUOTA_EXCEEDED")
+        # ==================================================
+        # 3. Temporary Errors
+        # ==================================================
 
-        # --------------------------------------------------
-        # Other Errors
-        # --------------------------------------------------
+        temporary_errors = (
 
-        print(
-            f"Gemini failed "
-            f"(Attempt {attempt + 1}/{retries}) : {message}"
+            "timeout",
+            "timed out",
+            "connection reset",
+            "connection aborted",
+            "connection refused",
+            "connection error",
+            "500",
+            "502",
+            "504",
+            "internal server error",
+            "gateway timeout",
+            "bad gateway",
+
         )
 
-        if attempt < retries - 1:
+        if any(
+            text in message_lower
+            for text in temporary_errors
+        ):
 
-            time.sleep(5)
+            wait = GeminiErrorHandler._temporary_wait(attempt)
+
+            print("\n - errorhandler.py:115" + "=" * 80)
+            print("TEMPORARY GEMINI ERROR - errorhandler.py:116")
+            print(message)
+            print(f"Retrying after {wait} seconds... - errorhandler.py:118")
+            print("= - errorhandler.py:119" * 80)
+
+            time.sleep(wait)
 
             return "retry"
 
+        # ==================================================
+        # 4. Permanent Error
+        # ==================================================
+
+        print("\n - errorhandler.py:129" + "=" * 80)
+        print("NONRETRYABLE GEMINI ERROR - errorhandler.py:130")
+        print(message)
+        print("= - errorhandler.py:132" * 80)
+
         return "failed"
+
+    # ==================================================
+    # Retry time suggested by Gemini
+    # ==================================================
 
     @staticmethod
     def _get_retry_time(message):
@@ -60,7 +143,7 @@ class GeminiErrorHandler:
         match = re.search(
             r"retry in ([0-9.]+)s",
             message,
-            re.IGNORECASE
+            re.IGNORECASE,
         )
 
         if match:
@@ -68,3 +151,44 @@ class GeminiErrorHandler:
             return int(float(match.group(1))) + 2
 
         return 60
+
+    # ==================================================
+    # Exponential backoff for 503
+    # ==================================================
+
+    @staticmethod
+    def _server_wait(attempt):
+
+        waits = [
+            15,
+            30,
+            60,
+            120,
+            300,
+        ]
+
+        if attempt < len(waits):
+
+            return waits[attempt]
+
+        return 300
+
+    # ==================================================
+    # Temporary Errors
+    # ==================================================
+
+    @staticmethod
+    def _temporary_wait(attempt):
+
+        waits = [
+            5,
+            10,
+            20,
+            30,
+        ]
+
+        if attempt < len(waits):
+
+            return waits[attempt]
+
+        return 30

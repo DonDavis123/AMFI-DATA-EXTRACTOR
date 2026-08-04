@@ -6,15 +6,18 @@ class XmlDecoder:
     """
     Safely decodes XML responses.
 
-    Supported:
-    - UTF-8 BOM
-    - UTF-16 LE BOM
-    - UTF-16 BE BOM
-    - XML encoding declaration
+    Supported
+    ---------
+    • UTF-8 BOM
+    • UTF-16 LE BOM
+    • UTF-16 BE BOM
+    • XML encoding declaration
 
-    If no known encoding is detected,
-    returns None so the caller can use the
-    original response.text.
+    If no encoding can be determined,
+    no special decoding is performed.
+    The raw content is passed through as UTF-8 with
+    replacement characters for invalid bytes so the
+    remaining pipeline can continue.
     """
 
     @staticmethod
@@ -26,7 +29,7 @@ class XmlDecoder:
 
         if content.startswith(codecs.BOM_UTF8):
 
-            print("Detected UTF8 BOM - xml_decoder.py:29")
+            print("Detected UTF8 BOM - xml_decoder.py:32")
 
             return content.decode("utf-8-sig")
 
@@ -36,7 +39,7 @@ class XmlDecoder:
 
         if content.startswith(codecs.BOM_UTF16_LE):
 
-            print("Detected UTF16 LE - xml_decoder.py:39")
+            print("Detected UTF16 LE - xml_decoder.py:42")
 
             return content.decode("utf-16")
 
@@ -46,12 +49,12 @@ class XmlDecoder:
 
         if content.startswith(codecs.BOM_UTF16_BE):
 
-            print("Detected UTF16 BE - xml_decoder.py:49")
+            print("Detected UTF16 BE - xml_decoder.py:52")
 
             return content.decode("utf-16")
 
         # ---------------------------------------------
-        # XML Declaration
+        # XML Encoding Declaration
         # ---------------------------------------------
 
         header = content[:200].decode(
@@ -77,20 +80,22 @@ class XmlDecoder:
 
                 return content.decode(encoding)
 
-            except Exception:
+            except Exception as e:
 
                 print(
-                    "Declared encoding failed."
+                    f"Declared encoding '{encoding}' failed."
                 )
-
-                return None
+                print(e)
 
         # ---------------------------------------------
-        # Unknown
+        # Unknown Encoding
         # ---------------------------------------------
 
         print(
-            "Unknown XML encoding."
+            "Unknown XML encoding. Passing content without special decoding."
         )
 
-        return None
+        return content.decode(
+            "utf-8",
+            errors="replace"
+        )
