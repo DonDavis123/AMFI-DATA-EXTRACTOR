@@ -9,9 +9,9 @@ class GeminiErrorHandler:
     Returns
     -------
     retry         -> Retry using current API key.
-   retry_forever  -> Keep retrying indefinitely (503 High Demand).
-   switch_key     -> Current API key quota exhausted.
-   failed         -> Permanent/non-retryable error.
+    retry_forever -> Keep retrying indefinitely (503 High Demand).
+    switch_key    -> Current API key quota exhausted OR invalid API key.
+    failed        -> Permanent/non-retryable error.
     """
 
     @staticmethod
@@ -123,13 +123,46 @@ class GeminiErrorHandler:
             return "retry"
 
         # ==================================================
-        # 4. Permanent Error
+        # 4. Invalid / Deleted API Key
         # ==================================================
 
-        print("\n - errorhandler.py:129" + "=" * 80)
-        print("NONRETRYABLE GEMINI ERROR - errorhandler.py:130")
+        invalid_key_errors = (
+
+            "401",
+            "unauthenticated",
+            "authentication",
+            "permission_denied",
+            "api_key_invalid",
+            "invalid api key",
+            "api key not valid",
+            "api key expired",
+            "api key has expired",
+            "invalid credentials",
+            "credential",
+
+        )
+
+        if any(
+            text in message_lower
+            for text in invalid_key_errors
+        ):
+
+            print("\n - errorhandler.py:150" + "=" * 80)
+            print("INVALID GEMINI API KEY - errorhandler.py:151")
+            print("Current API key is invalid, deleted or expired. - errorhandler.py:152")
+            print("Switching to next API Key... - errorhandler.py:153")
+            print("= - errorhandler.py:154" * 80)
+
+            return "switch_key"
+
+        # ==================================================
+        # 5. Permanent Error
+        # ==================================================
+
+        print("\n - errorhandler.py:162" + "=" * 80)
+        print("NONRETRYABLE GEMINI ERROR - errorhandler.py:163")
         print(message)
-        print("= - errorhandler.py:132" * 80)
+        print("= - errorhandler.py:165" * 80)
 
         return "failed"
 
