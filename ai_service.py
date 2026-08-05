@@ -123,11 +123,11 @@ XML
                     or "rate limit" in error.lower()
                 ):
 
-                    print("\n - ai_service.py:126" + "=" * 80)
+                    print("\n - ai_service.py:126")
                     print("GEMINI FREE TIER LIMIT REACHED - ai_service.py:127")
                     print("Stopping extraction. - ai_service.py:128")
                     print("Please run the program again after your quota resets. - ai_service.py:129")
-                    print("= - ai_service.py:130" * 80)
+                    print("= - ai_service.py:130")
 
                     raise RuntimeError("GEMINI_QUOTA_EXCEEDED")
 
