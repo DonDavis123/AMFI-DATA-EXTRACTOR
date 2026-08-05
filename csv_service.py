@@ -14,10 +14,6 @@ class CsvService:
 
         os.makedirs(self.output_folder, exist_ok=True)
 
-        # --------------------------------------------------
-        # Create CSV if it doesn't exist
-        # --------------------------------------------------
-
         if not os.path.exists(self.file_path):
 
             with open(
@@ -63,15 +59,17 @@ class CsvService:
                 rows = list(reader)
 
             header = rows[0]
-            data_rows = rows[1:]
 
-            # ------------------------------------------
-            # Build ISIN Lookup
-            # ------------------------------------------
+            # -------------------------------------------------
+            # Dictionary keyed by ISIN
+            # Automatically removes duplicate ISINs
+            # -------------------------------------------------
 
-            isin_to_index = {}
+            records = {}
 
-            for index, row in enumerate(data_rows):
+            duplicate_count = 0
+
+            for row in rows[1:]:
 
                 if len(row) < 2:
                     continue
@@ -81,19 +79,17 @@ class CsvService:
                 if not isin:
                     continue
 
-                if isin in isin_to_index:
+                if isin in records:
+                    duplicate_count += 1
+                    print(f"Duplicate ISIN repaired : {isin} - csv_service.py:84")
 
-                    raise ValueError(
-                        f"Duplicate ISIN already exists in CSV: {isin}"
-                    )
-
-                isin_to_index[isin] = index
+                records[isin] = row
 
             inserted = 0
             updated = 0
 
             # ------------------------------------------
-            # Insert / Update Records
+            # Insert / Update
             # ------------------------------------------
 
             for fund in extraction.funds:
@@ -120,29 +116,24 @@ class CsvService:
                     fund.fund_manager_name.strip()
                 ]
 
-                # ----------------------------------
-                # Update Existing Record
-                # ----------------------------------
+                if isin in records:
 
-                if isin in isin_to_index:
-
-                    row_index = isin_to_index[isin]
-
-                    data_rows[row_index] = record
-
+                    records[isin] = record
                     updated += 1
-
-                # ----------------------------------
-                # Insert New Record
-                # ----------------------------------
 
                 else:
 
-                    data_rows.append(record)
-
-                    isin_to_index[isin] = len(data_rows) - 1
-
+                    records[isin] = record
                     inserted += 1
+
+            # ------------------------------------------
+            # Sort records
+            # ------------------------------------------
+
+            data_rows = sorted(
+                records.values(),
+                key=lambda row: row[1]
+            )
 
             # ------------------------------------------
             # Rewrite CSV
@@ -164,36 +155,27 @@ class CsvService:
             # Logs
             # ------------------------------------------
 
-            print("\n - csv_service.py:167" + "=" * 80)
-            print("CSV Updated Successfully - csv_service.py:168")
-            print(f"Inserted : {inserted} - csv_service.py:169")
-            print(f"Updated  : {updated} - csv_service.py:170")
-            print(f"Total Rows : {len(data_rows)} - csv_service.py:171")
-            print("= - csv_service.py:172" * 80)
-
-        # ----------------------------------------------
-        # File Open
-        # ----------------------------------------------
+            print("\n - csv_service.py:158" + "=" * 80)
+            print("CSV Updated Successfully - csv_service.py:159")
+            print(f"Inserted          : {inserted} - csv_service.py:160")
+            print(f"Updated           : {updated} - csv_service.py:161")
+            print(f"Duplicate Removed : {duplicate_count} - csv_service.py:162")
+            print(f"Total Rows        : {len(data_rows)} - csv_service.py:163")
+            print("= - csv_service.py:164" * 80)
 
         except PermissionError:
 
-            print("\n - csv_service.py:180" + "=" * 80)
-            print("ERROR - csv_service.py:181")
-            print("Unable to write to funds.csv. - csv_service.py:182")
-            print("The CSV file is currently open. - csv_service.py:183")
-            print("Please close the file and run again. - csv_service.py:184")
-            print("= - csv_service.py:185" * 80)
+            print("\n - csv_service.py:168" + "=" * 80)
+            print("Unable to write to funds.csv - csv_service.py:169")
+            print("Close the CSV file and try again. - csv_service.py:170")
+            print("= - csv_service.py:171" * 80)
 
             raise
 
-        # ----------------------------------------------
-        # Unexpected Errors
-        # ----------------------------------------------
-
         except Exception as e:
 
-            print("\n - csv_service.py:195" + "=" * 80)
-            print(f"CSV Write Failed : {e} - csv_service.py:196")
-            print("= - csv_service.py:197" * 80)
+            print("\n - csv_service.py:177" + "=" * 80)
+            print(f"CSV Write Failed : {e} - csv_service.py:178")
+            print("= - csv_service.py:179" * 80)
 
             raise
