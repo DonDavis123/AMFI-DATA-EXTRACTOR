@@ -53,3 +53,13 @@ class Logger:
 
         with open(self.log_file, "a", encoding="utf-8") as file:
             file.write(message)
+    def clear_error_log(self):
+
+        if os.path.exists(self.log_file):
+
+            with open(self.log_file, "w", encoding="utf-8") as file:
+                pass
+
+            print("\n - logger.py:63" + "=" * 80)
+            print("ERROR LOG CLEARED - logger.py:64")
+            print("= - logger.py:65" * 80)        
