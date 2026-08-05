@@ -2,7 +2,7 @@ import os
 import json
 import time
 
-import google.generativeai as genai
+import google.genai as genai
 from dotenv import load_dotenv
 
 from models import FundExtraction
@@ -123,7 +123,7 @@ XML
                     or "rate limit" in error.lower()
                 ):
 
-                    print("\n - ai_service.py:126")
+                    print("\n - ai_service.py:126" )
                     print("GEMINI FREE TIER LIMIT REACHED - ai_service.py:127")
                     print("Stopping extraction. - ai_service.py:128")
                     print("Please run the program again after your quota resets. - ai_service.py:129")

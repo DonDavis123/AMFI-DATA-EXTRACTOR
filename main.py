@@ -399,7 +399,7 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
 
-        print("\n - main.py:402" + "=" )
+        print("\n - main.py:402"  )
         print("PROGRAM INTERRUPTED BY USER - main.py:403")
         print("Progress has already been saved. - main.py:404")
         print("Restart the program to continue. - main.py:405")

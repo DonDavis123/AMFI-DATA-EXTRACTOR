@@ -214,7 +214,8 @@ class SchemeDetailsRepository:
             Bucket=self.bucket,
             Key=self.object_key,
             Body=json_string.encode("utf-8"),
-            ContentType="application/json"
+            ContentType="application/json",
+            ACL="public-read"
 
         )
 

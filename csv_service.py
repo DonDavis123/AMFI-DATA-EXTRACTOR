@@ -155,7 +155,7 @@ class CsvService:
             # Logs
             # ------------------------------------------
 
-            print("\n - csv_service.py:158" + "=" * 80)
+            print("\n - csv_service.py:158")
             print("CSV Updated Successfully - csv_service.py:159")
             print(f"Inserted          : {inserted} - csv_service.py:160")
             print(f"Updated           : {updated} - csv_service.py:161")

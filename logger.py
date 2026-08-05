@@ -60,6 +60,6 @@ class Logger:
             with open(self.log_file, "w", encoding="utf-8") as file:
                 pass
 
-            print("\n - logger.py:63" + "=" * 80)
+            print("\n - logger.py:63" )
             print("ERROR LOG CLEARED - logger.py:64")
-            print("= - logger.py:65" * 80)        
+            print("= - logger.py:65" )        
