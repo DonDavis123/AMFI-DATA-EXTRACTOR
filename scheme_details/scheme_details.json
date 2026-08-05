@@ -1,0 +1,32 @@
+{
+    "INF109K01415": {
+        "fund_name": "ICICI Prudential FMCG Fund - Growth",
+        "isin": "INF109K01415",
+        "fund_type": "Open Ended",
+        "riskometer_at_launch": "Very High",
+        "riskometer_as_on_date": "Very High",
+        "category": "Equity - Sectoral/Thematic",
+        "description": "To generate long term capital appreciation through investments made primarily inequity & equity related securities forming part of FMCG sector. However, there is no assurance or guarantee that the investment objective of the Scheme would be achieved.",
+        "fund_manager_name": "Nitya Mishra, Sharmila D'silva"
+    },
+    "INF109K01EO2": {
+        "fund_name": "ICICI Prudential FMCG Fund - IDCW - Payout",
+        "isin": "INF109K01EO2",
+        "fund_type": "Open Ended",
+        "riskometer_at_launch": "Very High",
+        "riskometer_as_on_date": "Very High",
+        "category": "Equity - Sectoral/Thematic",
+        "description": "To generate long term capital appreciation through investments made primarily inequity & equity related securities forming part of FMCG sector. However, there is no assurance or guarantee that the investment objective of the Scheme would be achieved.",
+        "fund_manager_name": "Nitya Mishra, Sharmila D'silva"
+    },
+    "INF109K01423": {
+        "fund_name": "ICICI Prudential FMCG Fund - IDCW - Reinvestment",
+        "isin": "INF109K01423",
+        "fund_type": "Open Ended",
+        "riskometer_at_launch": "Very High",
+        "riskometer_as_on_date": "Very High",
+        "category": "Equity - Sectoral/Thematic",
+        "description": "To generate long term capital appreciation through investments made primarily inequity & equity related securities forming part of FMCG sector. However, there is no assurance or guarantee that the investment objective of the Scheme would be achieved.",
+        "fund_manager_name": "Nitya Mishra, Sharmila D'silva"
+    }
+}
