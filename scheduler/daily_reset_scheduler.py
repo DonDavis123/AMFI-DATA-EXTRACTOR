@@ -1,6 +1,9 @@
 import time
 from datetime import datetime, timedelta
 from zoneinfo import ZoneInfo
+from system_logger import SystemLogger
+
+system_logger = SystemLogger.get_logger()
 
 
 class DailyResetScheduler:
@@ -33,15 +36,10 @@ class DailyResetScheduler:
 
         # Convert to user's local timezone
         local_reset = next_midnight.astimezone(local.tzinfo)
-
-        print("\n - daily_reset_scheduler.py:37" + "=" * 80)
-        print("ALL GEMINI API QUOTAS ARE EXHAUSTED - daily_reset_scheduler.py:38")
-        print(f"Current Local Time : {local:%d%m%Y %H:%M:%S %Z} - daily_reset_scheduler.py:39")
-        print(f"Current PT Time    : {pacific_now:%d%m%Y %H:%M:%S %Z} - daily_reset_scheduler.py:40")
-        print(f"Quota Reset (PT)   : {next_midnight:%d%m%Y %H:%M:%S %Z} - daily_reset_scheduler.py:41")
-        print(f"Resume Local Time  : {local_reset:%d%m%Y %H:%M:%S %Z} - daily_reset_scheduler.py:42")
-        print("= - daily_reset_scheduler.py:43" * 80)
-
+        system_logger.warning(
+           f"All Gemini API keys exhausted. Waiting until {next_midnight:%Y-%m-%d %H:%M:%S %Z} for quota reset."
+        )
+        
         while True:
 
             remaining = local_reset - datetime.now().astimezone()
@@ -56,18 +54,10 @@ class DailyResetScheduler:
             minutes = (total % 3600) // 60
             seconds = total % 60
 
-            print(
-                f"\rWaiting for Gemini quota reset : "
-                f"{days}d "
-                f"{hours:02}:{minutes:02}:{seconds:02}",
-                end="",
-                flush=True
-            )
+           
 
             time.sleep(1)
 
-        print("\n - daily_reset_scheduler.py:69")
-        print("= - daily_reset_scheduler.py:70" * 80)
-        print("Gemini quota has been reset. - daily_reset_scheduler.py:71")
-        print("Resuming processing... - daily_reset_scheduler.py:72")
-        print("= - daily_reset_scheduler.py:73" * 80)
+        system_logger.info(
+               "Gemini quota reset reached. Resuming processing."
+        )

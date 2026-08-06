@@ -1,5 +1,8 @@
 import codecs
 import re
+from system_logger import SystemLogger
+
+system_logger = SystemLogger.get_logger()
 
 
 class XmlDecoder:
@@ -29,8 +32,7 @@ class XmlDecoder:
 
         if content.startswith(codecs.BOM_UTF8):
 
-            print("Detected UTF8 BOM - xml_decoder.py:32")
-
+            
             return content.decode("utf-8-sig")
 
         # ---------------------------------------------
@@ -39,7 +41,7 @@ class XmlDecoder:
 
         if content.startswith(codecs.BOM_UTF16_LE):
 
-            print("Detected UTF16 LE - xml_decoder.py:42")
+           
 
             return content.decode("utf-16")
 
@@ -49,7 +51,7 @@ class XmlDecoder:
 
         if content.startswith(codecs.BOM_UTF16_BE):
 
-            print("Detected UTF16 BE - xml_decoder.py:52")
+            
 
             return content.decode("utf-16")
 
@@ -72,9 +74,7 @@ class XmlDecoder:
 
             encoding = match.group(1)
 
-            print(
-                f"Detected XML Encoding : {encoding}"
-            )
+           
 
             try:
 
@@ -82,18 +82,15 @@ class XmlDecoder:
 
             except Exception as e:
 
-                print(
-                    f"Declared encoding '{encoding}' failed."
-                )
-                print(e)
+               system_logger.warning(
+                    f"Failed to decode XML using declared encoding '{encoding}'. Falling back to UTF-8. Error: {e}"
+               )
 
         # ---------------------------------------------
         # Unknown Encoding
         # ---------------------------------------------
 
-        print(
-            "Unknown XML encoding. Passing content without special decoding."
-        )
+       
 
         return content.decode(
             "utf-8",

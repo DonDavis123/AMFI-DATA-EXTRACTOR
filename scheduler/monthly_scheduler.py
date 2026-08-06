@@ -1,5 +1,8 @@
 import time
 from datetime import datetime
+from system_logger import SystemLogger
+
+system_logger = SystemLogger.get_logger()
 
 
 class MonthlyScheduler:
@@ -34,12 +37,7 @@ class MonthlyScheduler:
                 second=0
             )
 
-        print("\n - monthly_scheduler.py:37" + "=" * 80)
-        print("ALL FUNDS HAVE BEEN UPDATED - monthly_scheduler.py:38")
-        print(f"Current Time : {now:%d%m%Y %H:%M:%S} - monthly_scheduler.py:39")
-        print(f"Next Run     : {next_run:%d%m%Y %H:%M:%S} - monthly_scheduler.py:40")
-        print("= - monthly_scheduler.py:41" * 80)
-
+        
         while True:
 
             remaining = next_run - datetime.now()
@@ -52,17 +50,10 @@ class MonthlyScheduler:
             minutes = (remaining.seconds % 3600) // 60
             seconds = remaining.seconds % 60
 
-            print(
-                f"\rSleeping : "
-                f"{days}d "
-                f"{hours:02}:{minutes:02}:{seconds:02}",
-                end="",
-                flush=True
-            )
+            
 
-            time.sleep(1)
+            time.sleep(min(60, remaining.total_seconds()))
 
-        print("\n - monthly_scheduler.py:65")
-        print("= - monthly_scheduler.py:66" * 80)
-        print("Monthly update starting... - monthly_scheduler.py:67")
-        print("= - monthly_scheduler.py:68" * 80)
+        system_logger.info(
+         "Monthly update starting."
+        )

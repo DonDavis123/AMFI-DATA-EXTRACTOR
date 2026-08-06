@@ -1,5 +1,8 @@
 from copy import deepcopy
 from xml.etree import ElementTree as ET
+from system_logger import SystemLogger
+
+system_logger = SystemLogger.get_logger()
 
 
 class SchemeSummaryOptimizer:
@@ -47,8 +50,9 @@ class SchemeSummaryOptimizer:
 
         except ET.ParseError:
 
-            print("Invalid SchemeSummary XML. - scheme_summary_optimizer.py:50")
-            print("Skipping optimization. - scheme_summary_optimizer.py:51")
+            system_logger.error(
+               "Invalid SchemeSummary XML."
+            )
 
             return xml_string
 
@@ -68,7 +72,6 @@ class SchemeSummaryOptimizer:
 
         if len(summaries) != 1:
 
-            print("Unexpected SchemeSummary structure. - scheme_summary_optimizer.py:71")
 
             return xml_string
 
@@ -87,9 +90,7 @@ class SchemeSummaryOptimizer:
 
         if missing:
 
-            print("\nSkipping optimization. - scheme_summary_optimizer.py:90")
-            print("Missing Required Tags: - scheme_summary_optimizer.py:91")
-            print(sorted(missing))
+           
 
             return xml_string
 
@@ -148,10 +149,6 @@ class SchemeSummaryOptimizer:
             / original_size
         ) * 100
 
-        print("\n✓ SchemeSummary Optimization Complete - scheme_summary_optimizer.py:151")
-        print(f"Original Size : {original_size:,} chars - scheme_summary_optimizer.py:152")
-        print(f"Optimized Size: {optimized_size:,} chars - scheme_summary_optimizer.py:153")
-        print(f"Removed Tags  : {removed_tags} - scheme_summary_optimizer.py:154")
-        print(f"Reduction     : {reduction:.2f}% - scheme_summary_optimizer.py:155")
+       
 
         return optimized_xml
