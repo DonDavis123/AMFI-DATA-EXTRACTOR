@@ -63,13 +63,10 @@ class ApiKeyManager:
 
         self.current_index += 1
 
-        print("\n - api_keymanager.py:66" + "=" * 80)
+       
         print("Switching Gemini API Key - api_keymanager.py:67")
-        print(
-            f"Using API Key "
-            f"{self.current_index + 1}/{len(self.api_keys)}"
-        )
-        print("= - api_keymanager.py:72" * 80)
+        
+        
 
         return self.get_key()
 

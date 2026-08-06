@@ -2,6 +2,9 @@ from xml.etree import ElementTree as ET
 
 from processors.optimizer.spreadsheet_optimizer import SpreadsheetOptimizer
 from processors.optimizer.scheme_summary_optimizer import SchemeSummaryOptimizer
+from system_logger import SystemLogger
+
+system_logger = SystemLogger.get_logger()
 
 
 class XmlManager:
@@ -34,9 +37,9 @@ class XmlManager:
 
         except ET.ParseError as e:
 
-         print(f"Parse Error: {e} - xml_manager.py:37")
-
-         print(repr(xml_string[:300]))
+         system_logger.error(
+            f"XML parse error: {e}"
+        )
 
          return xml_string
 
@@ -49,8 +52,7 @@ class XmlManager:
             and self.SPREADSHEET_NS in root.tag
         ):
 
-            print("\nDetected XML : SpreadsheetML - xml_manager.py:52")
-            print("Using Spreadsheet Optimizer... - xml_manager.py:53")
+            
 
             return self.spreadsheet_optimizer.optimize(
                 xml_string
@@ -62,8 +64,7 @@ class XmlManager:
 
         if root.tag.endswith("SchemeSummaryDocument"):
 
-            print("\nDetected XML : SchemeSummaryDocument - xml_manager.py:65")
-            print("Using SchemeSummary Optimizer... - xml_manager.py:66")
+           
 
             return self.scheme_optimizer.optimize(
                 xml_string
@@ -73,7 +74,7 @@ class XmlManager:
         # Unknown XML
         # --------------------------------------------------
 
-        print("\nUnknown XML format. - xml_manager.py:76")
-        print("Skipping optimization. - xml_manager.py:77")
-
+        system_logger.warning(
+           f"Unknown XML format encountered: {root.tag}"
+        )
         return xml_string

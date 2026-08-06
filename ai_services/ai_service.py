@@ -91,8 +91,7 @@ XML
                         f"{self.key_manager.total_keys()}"
                     )
 
-                    print(f"XML characters : {len(xml):,} - ai_service.py:94")
-                    print(f"Prompt characters : {len(prompt):,} - ai_service.py:95")
+                    
 
                     response = self.client.models.generate_content(
                         model="gemini-3.5-flash-lite",
@@ -112,11 +111,11 @@ XML
 
                     import traceback
 
-                    print("= - ai_service.py:115" * 80)
+                    
                     print(type(e))
                     print(repr(e))
                     traceback.print_exc()
-                    print("= - ai_service.py:119" * 80)
+                    
 
                     action = GeminiErrorHandler.handle(
                         e,
@@ -132,7 +131,7 @@ XML
                         continue
                     if action == "retry_forever":
 
-                        print("\nWaiting for Gemini service to recover... - ai_service.py:135")
+                        print("\nWaiting for Gemini service to recover... - ai_service.py:134")
 
                         break
 
@@ -150,13 +149,13 @@ XML
                                 api_key=new_key
                             )
 
-                            print("\n - ai_service.py:153" + "=" * 80)
+                            print("\n - ai_service.py:152" + "=" * 80)
                             print(
                                 f"Switched to API Key "
                                 f"{self.key_manager.current_key_number()}/"
                                 f"{self.key_manager.total_keys()}"
                             )
-                            print("= - ai_service.py:159" * 80)
+                            print("= - ai_service.py:158" * 80)
 
                             # Exit retry loop and restart with new key
                             break

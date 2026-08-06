@@ -114,12 +114,6 @@ class SchemeDetailsRepository:
 
         self._save_json(records)
 
-        print("\n - scheme_details_service.py:117")
-        print("SCHEME DETAILS UPDATED SUCCESSFULLY - scheme_details_service.py:118")
-        print(f"Inserted : {inserted} - scheme_details_service.py:119")
-        print(f"Updated  : {updated} - scheme_details_service.py:120")
-        print(f"Total    : {len(records)} - scheme_details_service.py:121")
-        print("= - scheme_details_service.py:122")
 
     # ==================================================
     # Load JSON From DigitalOcean Spaces
@@ -140,10 +134,7 @@ class SchemeDetailsRepository:
                 .decode("utf-8")
             )
 
-            print(
-                "Loaded existing "
-                "scheme_details.json"
-            )
+            
 
             return json.loads(content)
 

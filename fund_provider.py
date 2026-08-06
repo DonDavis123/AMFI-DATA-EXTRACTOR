@@ -2,6 +2,9 @@ import requests
 
 from processors.decoder.xml_decoder import XmlDecoder
 from network.network_handler import NetworkHandler
+from system_logger import SystemLogger
+
+system_logger = SystemLogger.get_logger()
 
 
 class FundProvider:
@@ -179,8 +182,15 @@ class FundProvider:
             except Exception as e:
 
                 if NetworkHandler.is_network_error(e):
+                    system_logger.warning(
+                      "Network connection lost. Waiting for internet..."
+                    )
+
 
                     NetworkHandler.wait_until_online()
+                    system_logger.info(
+                        "Internet connection restored."
+                    )
 
                     continue
 

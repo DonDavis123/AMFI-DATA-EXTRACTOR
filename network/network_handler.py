@@ -1,5 +1,8 @@
 import time
 import requests
+from system_logger import SystemLogger
+
+system_logger = SystemLogger.get_logger()
 
 
 class NetworkHandler:
@@ -13,7 +16,7 @@ class NetworkHandler:
     • Retry forever
     """
 
-    CHECK_URL = "https://www.google.com"
+    CHECK_URL = "https://www.amfiindia.com"
     RETRY_INTERVAL = 30  # seconds
 
     @staticmethod
@@ -31,12 +34,10 @@ class NetworkHandler:
 
     @staticmethod
     def wait_until_online():
-
-        print("\n - network_handler.py:35" + "=" * 80)
-        print("NETWORK CONNECTION LOST - network_handler.py:36")
-        print("Waiting for internet... - network_handler.py:37")
-        print("= - network_handler.py:38" * 80)
-
+        system_logger.warning(
+          "Network connection lost. Waiting for internet..."
+        )
+       
         while True:
 
             try:
@@ -46,17 +47,14 @@ class NetworkHandler:
                     timeout=5,
                 )
 
-                print("\nInternet connection restored. - network_handler.py:49")
-                print("= - network_handler.py:50" * 80)
-
+               system_logger.info(
+                    "Internet connection restored."
+                )
                 return
 
             except requests.exceptions.RequestException:
 
-                print(
-                    f"No internet. Retrying in "
-                    f"{NetworkHandler.RETRY_INTERVAL} seconds..."
-                )
+                
 
                 time.sleep(
                     NetworkHandler.RETRY_INTERVAL
