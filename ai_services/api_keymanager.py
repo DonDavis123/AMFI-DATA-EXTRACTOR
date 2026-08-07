@@ -1,5 +1,8 @@
 import os
 from dotenv import load_dotenv
+from system_logger import SystemLogger
+
+system_logger = SystemLogger.get_logger()
 
 
 class ApiKeyManager:
@@ -64,7 +67,10 @@ class ApiKeyManager:
         self.current_index += 1
 
        
-        print("Switching Gemini API Key - api_keymanager.py:67")
+        system_logger.warning(
+    f"Switching to Gemini API key {self.current_key_number() + 1} "
+    f"of {self.total_keys()}."
+)
         
         
 

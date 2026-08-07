@@ -47,7 +47,7 @@ class NetworkHandler:
                     timeout=5,
                 )
 
-               system_logger.info(
+                system_logger.info(
                     "Internet connection restored."
                 )
                 return

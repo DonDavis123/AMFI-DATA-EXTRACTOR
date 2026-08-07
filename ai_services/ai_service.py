@@ -10,6 +10,9 @@ from dotenv import load_dotenv
 from ai_services.errorhandler import GeminiErrorHandler
 from models import FundExtraction
 from ai_services.api_keymanager import ApiKeyManager
+from system_logger import SystemLogger
+
+system_logger = SystemLogger.get_logger()
 
 
 class GeminiAI:
@@ -28,7 +31,9 @@ class GeminiAI:
     def extract(self, xml):
 
         if not xml or not xml.strip():
-            print("Empty XML received. - ai_service.py:31")
+            system_logger.warning(
+              "Empty XML received. Skipping Gemini extraction."
+)
             return None
 
         prompt = f"""
@@ -85,11 +90,7 @@ XML
 
                 try:
 
-                    print(
-                        f"Using API Key : "
-                        f"{self.key_manager.current_key_number()}/"
-                        f"{self.key_manager.total_keys()}"
-                    )
+                   
 
                     
 
@@ -109,12 +110,10 @@ XML
 
                 except Exception as e:
 
-                    import traceback
+                    
 
                     
-                    print(type(e))
-                    print(repr(e))
-                    traceback.print_exc()
+                    
                     
 
                     action = GeminiErrorHandler.handle(
@@ -131,7 +130,7 @@ XML
                         continue
                     if action == "retry_forever":
 
-                        print("\nWaiting for Gemini service to recover... - ai_service.py:134")
+                        
 
                         break
 
@@ -149,14 +148,7 @@ XML
                                 api_key=new_key
                             )
 
-                            print("\n - ai_service.py:152" + "=" * 80)
-                            print(
-                                f"Switched to API Key "
-                                f"{self.key_manager.current_key_number()}/"
-                                f"{self.key_manager.total_keys()}"
-                            )
-                            print("= - ai_service.py:158" * 80)
-
+                            
                             # Exit retry loop and restart with new key
                             break
 

@@ -1,5 +1,8 @@
 import re
 import time
+from system_logger import SystemLogger
+
+system_logger = SystemLogger.get_logger()
 
 
 class GeminiErrorHandler:
@@ -26,28 +29,23 @@ class GeminiErrorHandler:
 
         if (
             "resource_exhausted" in message_lower
-            or "429" in message
+            or "429" in message_lower
             or "quota" in message_lower
             or "rate limit" in message_lower
         ):
 
             wait = GeminiErrorHandler._get_retry_time(message)
 
-            print("\n - errorhandler.py:36" + "=" * 80)
-            print("GEMINI API QUOTA EXHAUSTED - errorhandler.py:37")
-            print(f"Attempt : {attempt + 1}/{retries} - errorhandler.py:38")
-            print(f"Retry After : {wait} seconds - errorhandler.py:39")
-            print("= - errorhandler.py:40" * 80)
-
+            
             if attempt < retries - 1:
 
                 time.sleep(wait)
 
                 return "retry"
 
-            print("\nRetries exhausted for current API Key. - errorhandler.py:48")
-            print("Switching to next API Key... - errorhandler.py:49")
-
+            system_logger.warning(
+                 "Retries exhausted for current API key. Switching to next API key."
+            )
             return "switch_key"
 
         # ==================================================
@@ -73,13 +71,9 @@ class GeminiErrorHandler:
 
             wait = GeminiErrorHandler._server_wait(attempt)
 
-            print("\n - errorhandler.py:76" + "=" * 80)
-            print("GEMINI SERVER BUSY - errorhandler.py:77")
-            print("Model is experiencing high demand. - errorhandler.py:78")
-            print(f"Waiting {wait} seconds before retrying... - errorhandler.py:79")
-            print("Current scheme will NOT be skipped. - errorhandler.py:80")
-            print("= - errorhandler.py:81" * 80)
-
+            system_logger.warning(
+                 f"Gemini server busy (503). Waiting {wait} seconds before retrying."
+            )
             time.sleep(wait)
 
             return "retry_forever"
@@ -112,12 +106,9 @@ class GeminiErrorHandler:
 
             wait = GeminiErrorHandler._temporary_wait(attempt)
 
-            print("\n - errorhandler.py:115" + "=" * 80)
-            print("TEMPORARY GEMINI ERROR - errorhandler.py:116")
-            print(message)
-            print(f"Retrying after {wait} seconds... - errorhandler.py:118")
-            print("= - errorhandler.py:119" * 80)
-
+            system_logger.warning(
+                f"Temporary Gemini error: {message}. Retrying after {wait} seconds."
+            )
             time.sleep(wait)
 
             return "retry"
@@ -147,11 +138,9 @@ class GeminiErrorHandler:
             for text in invalid_key_errors
         ):
 
-            print("\n - errorhandler.py:150" + "=" * 80)
-            print("INVALID GEMINI API KEY - errorhandler.py:151")
-            print("Current API key is invalid, deleted or expired. - errorhandler.py:152")
-            print("Switching to next API Key... - errorhandler.py:153")
-            print("= - errorhandler.py:154" * 80)
+            system_logger.error(
+              "Invalid, deleted, or expired Gemini API key. Switching to next API key."
+            )
 
             return "switch_key"
 
@@ -159,11 +148,9 @@ class GeminiErrorHandler:
         # 5. Permanent Error
         # ==================================================
 
-        print("\n - errorhandler.py:162" + "=" * 80)
-        print("NONRETRYABLE GEMINI ERROR - errorhandler.py:163")
-        print(message)
-        print("= - errorhandler.py:165" * 80)
-
+        system_logger.error(
+             f"Non-retryable Gemini error: {message}"
+        )
         return "failed"
 
     # ==================================================

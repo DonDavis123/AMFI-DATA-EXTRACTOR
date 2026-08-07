@@ -42,7 +42,7 @@ def main():
         last_index = saved_progress["last_index"]
         
 
-       system_logger.info("Previous progress loaded.")
+        system_logger.info("Previous progress loaded.")
        
 
     else:
@@ -95,7 +95,7 @@ def main():
                 error=str(e)
             )
 
-           system_logger.error(f"Unable to fetch scheme list for MF {mf_id}: {e}")
+            system_logger.error(f"Unable to fetch scheme list for MF {mf_id}: {e}")
 
             continue
 

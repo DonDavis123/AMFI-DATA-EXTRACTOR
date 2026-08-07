@@ -210,8 +210,4 @@ class SchemeDetailsRepository:
 
         )
 
-        print(
-            f"Uploaded to "
-            f"{self.bucket}/"
-            f"{self.object_key}"
-        )
+        
