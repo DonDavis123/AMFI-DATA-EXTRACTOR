@@ -2,6 +2,7 @@ import os
 import json
 import time
 
+
 from google import genai
 from google.genai import types
 from dotenv import load_dotenv
@@ -105,6 +106,8 @@ XML
                     )
 
                     data = json.loads(response.text)
+                    
+
 
                     return FundExtraction(**data)
 

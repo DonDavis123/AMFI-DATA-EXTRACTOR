@@ -3,6 +3,7 @@ import json
 
 import boto3
 from botocore.exceptions import ClientError
+from datetime import datetime
 
 
 class SchemeDetailsRepository:
@@ -69,6 +70,9 @@ class SchemeDetailsRepository:
     def upsert(self, extraction):
 
         records = self._load_json()
+        last_updated = datetime.now().strftime(
+        "%Y-%m-%d %H:%M:%S"
+         )
 
         inserted = 0
         updated = 0
@@ -98,7 +102,8 @@ class SchemeDetailsRepository:
                 "category": fund.category.strip(),
                 "description": fund.description.strip(),
                 "fund_manager_name":
-                    fund.fund_manager_name.strip()
+                    fund.fund_manager_name.strip(),
+                "last_updated": last_updated  
 
             }
 

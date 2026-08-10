@@ -12,6 +12,7 @@ class FundRow(BaseModel):
     category: str = ""
     description: str = ""
     fund_manager_name: str = ""
+    
 
 
 class FundExtraction(BaseModel):
