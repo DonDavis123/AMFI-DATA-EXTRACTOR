@@ -67,7 +67,7 @@ class SchemeDetailsRepository:
     # Insert / Update
     # ==================================================
 
-    def upsert(self, extraction):
+    def upsert(self, extraction,mf_id,scheme_id):
 
         records = self._load_json()
         last_updated = datetime.now().strftime(
@@ -91,6 +91,8 @@ class SchemeDetailsRepository:
                 continue
 
             record = {
+                "amfi_mf_id": mf_id,
+                "amfi_scheme_id": int(scheme_id),
 
                 "fund_name": fund.fund_name.strip(),
                 "isin": isin,

@@ -287,7 +287,7 @@ def main():
             try:
 
               # csv_service.append(result)
-               scheme_repository.upsert(result)    
+               scheme_repository.upsert(result,mf_id,scheme_id)    
 
                #print("✓ Data written to CSV. - main.py:300")
                
