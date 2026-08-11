@@ -230,6 +230,7 @@ def main():
             try:
 
                 result = ai.extract(xml)
+                
 
                 if result is None:
 
@@ -363,7 +364,7 @@ if __name__ == "__main__":
     try:
 
       system_logger.info("Application started.")
-      print("Application started - main.py:366")
+      print("Application started - main.py:367")
       while True:
 
           status = main()

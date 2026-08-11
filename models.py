@@ -1,5 +1,5 @@
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class FundRow(BaseModel):
@@ -11,8 +11,10 @@ class FundRow(BaseModel):
     riskometer_as_on_date: str = ""
     category: str = ""
     description: str = ""
-    fund_manager_name: str = ""
-    
+
+    fund_manager_name: List[str] = Field(
+        default_factory=list
+    )
 
 
 class FundExtraction(BaseModel):

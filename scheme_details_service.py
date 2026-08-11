@@ -103,8 +103,11 @@ class SchemeDetailsRepository:
                     fund.riskometer_as_on_date.strip(),
                 "category": fund.category.strip(),
                 "description": fund.description.strip(),
-                "fund_manager_name":
-                    fund.fund_manager_name.strip(),
+                "fund_manager_name": [
+                       name.strip()
+                       for name in fund.fund_manager_name
+                       if name and name.strip()
+                ],
                 "last_updated": last_updated  
 
             }
