@@ -242,7 +242,7 @@ def main():
 
             except RuntimeError as e:
 
-                if str(e) == "ALL API KEYS ARE EXHAUSTED":
+                if str(e) == "ALL_API_KEYS_ARE_EXHAUSTED":
 
                     system_logger.critical("All Gemini API keys exhausted.")
                     
@@ -372,6 +372,7 @@ if __name__ == "__main__":
           if status == "API_KEYS_EXHAUSTED":
 
               DailyResetScheduler.wait()
+              ai.reset_api_keys()
 
           elif status == "ALL_COMPLETED":
 

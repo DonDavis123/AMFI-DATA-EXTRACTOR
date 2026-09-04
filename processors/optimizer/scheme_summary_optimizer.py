@@ -20,6 +20,9 @@ class SchemeSummaryOptimizer:
 
     REQUIRED_TAGS = {
 
+
+        "Options_Names",
+        
         "Fund_Name",
 
         "Fund_Type",
